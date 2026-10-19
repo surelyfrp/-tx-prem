@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TX-PREM Premium Portal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        /* Top Header Navigation */
+        .top-navbar {
+            background-color: #008080;
+            color: white;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .brand-box {
+            background-color: #f1c40f;
+            color: #008080;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        .menu-toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Side Drawer Navigation */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 998;
+        }
+
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 999;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-drawer.open {
+            left: 0;
+        }
+
+        .drawer-header {
+            background-color: #008080;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-drawer-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .drawer-section-title {
+            padding: 15px 15px 5px 15px;
+            font-size: 13px;
+            color: #666;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .drawer-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .drawer-menu li a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 15px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .drawer-menu li a:hover {
+            background-color: #f8f9fa;
+            color: #008080;
+        }
+
+        .drawer-footer {
+            padding: 15px;
+        }
+
+        .auth-drawer-btn {
+            width: 100%;
+            background-color: #008080;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 650px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #008080;
+        }
+
+        .balance-box {
+            background-color: #e6f2f2;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            color: #008080;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .checkbox-container input {
+            width: auto;
+            margin-top: 0;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #008080;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background-color: #006666;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success { background-color: #d1e7dd; color: #0f5132; }
+        .error { background-color: #f8d7da; color: #842029; }
+
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e6f2f2;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: #008080;
+            border-bottom: 3px solid #008080;
+        }
+
+        #authPage { display: block; max-width: 420px; margin: 30px auto 0 auto; }
+        #portalPage { display: none; }
+        #otpSection { display: none; }
+
+        /* Table Design */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #e6f2f2;
+            color: #008080;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-success { background-color: #198754; }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<div class="top-navbar">
+    <div class="brand-logo">
+        <span class="brand-box">BX</span> Premium
+    </div>
+    <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
+</div>
+
+<!-- Drawer Overlay & Side Drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+
+<div class="side-drawer" id="sideDrawer">
+    <div class="drawer-header">
+        <button class="close-drawer-btn" onclick="toggleDrawer()">❮</button>
+        <div class="brand-logo">
+            <span class="brand-box">BX</span> Premium
+        </div>
+    </div>
+
+    <div class="drawer-section-title">SERVICE LIST</div>
+
+    <ul class="drawer-menu">
+        <li><a href="#" onclick="selectService('imei')">IMEI Service <span>❯</span></a></li>
+        <li><a href="#" onclick="selectService('server')">Server Service <span>❯</span></a></li>
+        <li><a href="#" onclick="selectService('rental')">Rental Service <span>❯</span></a></li>
+    </ul>
+
+    <div class="drawer-footer">
+        <button class="auth-drawer-btn" id="drawerAuthBtn" onclick="handleDrawerAuth()">
+            👤 <span id="drawerAuthText">Login | Register</span>
+        </button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 1. AUTH PAGE (LOGIN / REGISTER) -->
+    <div id="authPage" class="card">
+        <h1 style="text-align: center; color: #008080; margin-bottom: 15px; font-size: 24px;">TX-PREM Portal</h1>
+        
+        <div class="auth-tabs">
+            <button type="button" class="tab-btn active" id="loginTab" onclick="switchAuthMode('login')">Login</button>
+            <button type="button" class="tab-btn" id="registerTab" onclick="switchAuthMode('register')">Register</button>
+        </div>
+        
+        <div id="authError" class="status error" style="margin-bottom: 15px;"></div>
+        <div id="authSuccess" class="status success" style="margin-bottom: 15px;"></div>
+        
+        <!-- Login Form -->
+        <div id="loginForm">
+            <label for="loginIdentifier">Email or Username:</label>
+            <input type="text" id="loginIdentifier" placeholder="Ingiza Email au Username">
+
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" placeholder="Ingiza Password">
+
+            <button type="button" class="btn-submit" onclick="handleLogin()">Login</button>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" style="display: none;">
+            <div id="registrationInputs">
+                <label for="regUsername">Username:</label>
+                <input type="text" id="regUsername" placeholder="Chagua Username">
+
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" placeholder="Ingiza Barua Pepe (Email)">
+
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" placeholder="Tengeneza Password">
+
+                <div class="checkbox-container">
+                    <input type="checkbox" id="acceptTerms">
+                    <label for="acceptTerms" style="margin-top:0; font-weight:normal;">I accept terms & user rights</label>
+                </div>
+
+                <button type="button" class="btn-submit" onclick="sendVerificationCode()">Tuma Code Kwenye Email</button>
+            </div>
+
+            <!-- OTP Verification Section -->
+            <div id="otpSection">
+                <p style="font-size: 13px; color: #008080; margin-top: 10px;">
+                    Tumetuma code ya uthibitisho kwenye Email yako. Tafadhali chunguza Inbox/Spam.
+                </p>
+                <label for="otpInput">Ingiza Verification Code (OTP):</label>
+                <input type="text" id="otpInput" placeholder="Mfano: 482910" maxlength="6">
+
+                <button type="button" class="btn-submit" onclick="verifyOTPAndRegister()">Thibitisha & Maliza Usajili</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DASHBOARD / PORTAL PAGE -->
+    <div id="portalPage">
+        <!-- Account Status Card -->
+        <div class="card">
+            <h2>Akaunti ya Reseller</h2>
+            <div class="balance-box">
+                <span>Salio la Credits:</span>
+                <span id="userCredits">100 Credits</span>
+            </div>
+            <label for="resellerId">Reseller Email / Username:</label>
+            <input type="text" id="resellerId" readonly>
+        </div>
+
+        <!-- Service Order Section -->
+        <div class="card">
+            <h2 id="serviceTitle">IMEI Service Activation</h2>
+            
+            <label for="toolType">Chagua Huduma / Tool:</label>
+            <select id="toolType" onchange="updatePrice()">
+                <option value="10">TX-PREM FRP Activation (1 Month) - 10 Credits</option>
+                <option value="25">TX-PREM FRP License (1 Year) - 25 Credits</option>
+                <option value="5">FRP Credit Top-up (5 Credits)</option>
+            </select>
+
+            <label for="deviceSN" id="snLabel">Device Serial Number / IMEI:</label>
+            <input type="text" id="deviceSN" placeholder="Ingiza IMEI au Serial Number">
+
+            <p style="margin-top: 10px; font-size: 14px;">Inayohitajika: <b id="costDisplay">10 Credits</b></p>
+
+            <button class="btn-submit" onclick="processActivation()">Thibitisha Activation</button>
+
+            <div id="statusBox" class="status"></div>
+        </div>
+
+        <!-- Buy Credits Section -->
+        <div class="card">
+            <h2>Ongeza Credits (Top Up)</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Fanya malipo kisha uweke Kumbukumbu ya Muamala:</p>
+            
+            <label for="creditAmount">Kiasi cha Credits Unazotaka:</label>
+            <input type="number" id="creditAmount" placeholder="Mfano: 50">
+
+            <label for="paymentRef">Namba ya Muamala (Transaction Reference):</label>
+            <input type="text" id="paymentRef" placeholder="Mfano: QX892311XX">
+
+            <button class="btn-submit" style="background-color: #0288d1;" onclick="requestCredits()">Omba Credits</button>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="card">
+            <h2>Historia ya Miamala</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aina ya Huduma</th>
+                            <th>Kiasi</th>
+                            <th>Hali (Status)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td>Salio la Kuanzia (Welcome Credits)</td>
+                            <td style="color: #198754;">+100</td>
+                            <td><span class="badge badge-success">Imekamilika</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentCredits = 100;
+    let currentUser = "";
+    let generatedOTP = "";
+    let pendingUserData = {};
+
+    // Toggle Side Drawer Menu
+    function toggleDrawer() {
+        let drawer = document.getElementById("sideDrawer");
+        let overlay = document.getElementById("drawerOverlay");
+        
+        if (drawer.classList.contains("open")) {
+            drawer.classList.remove("open");
+            overlay.style.display = "none";
+        } else {
+            drawer.classList.add("open");
+            overlay.style.display = "block";
+        }
+    }
+
+    // Switch between IMEI, Server, and Rental Services from Drawer
+    function selectService(type) {
+        toggleDrawer();
+        
+        if (currentUser === "") {
+            alert("Tafadhali ingia au kujisajili kwanza!");
+            return;
+        }
+
+        let title = document.getElementById("serviceTitle");
+        let toolSelect = document.getElementById("toolType");
+        let snLabel = document.getElementById("snLabel");
+
+        if (type === 'imei') {
+            title.innerText = "IMEI Service Activation";
+            snLabel.innerText = "Device Serial Number / IMEI:";
+            toolSelect.innerHTML = `
+                <option value="10">TX-PREM FRP Activation (1 Month) - 10 Credits</option>
+                <option value="25">TX-PREM FRP License (1 Year) - 25 Credits</option>
+            `;
+        } else if (type === 'server') {
+            title.innerText = "Server Service Activation";
+            snLabel.innerText = "Server Username / Account ID:";
+            toolSelect.innerHTML = `
+                <option value="15">TX-PREM Server Credit (10 Credits Pack) - 15 Credits</option>
+                <option value="30">TX-PREM Authorized Server Access - 30 Credits</option>
+            `;
+        } else if (type === 'rental') {
+            title.innerText = "Rental Service";
+            snLabel.innerText = "Device / Dongle ID for Rent:";
+            toolSelect.innerHTML = `
+                <option value="5">TX-PREM Tool Rental (24 Hours) - 5 Credits</option>
+                <option value="12">TX-PREM Tool Rental (7 Days) - 12 Credits</option>
+            `;
+        }
+        updatePrice();
+    }
+
+    // Switch Auth Tabs (Login / Register)
+    function switchAuthMode(mode) {
+        document.getElementById("authError").style.display = "none";
+        document.getElementById("authSuccess").style.display = "none";
+        
+        if (mode === 'login') {
+            document.getElementById("loginForm").style.display = "block";
+            document.getElementById("registerForm").style.display = "none";
+            document.getElementById("loginTab").classList.add("active");
+            document.getElementById("registerTab").classList.remove("active");
+        } else {
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("registerForm").style.display = "block";
+            document.getElementById("registerTab").classList.add("active");
+            document.getElementById("loginTab").classList.remove("active");
+        }
+    }
+
+    // Send Email OTP Code
+    function sendVerificationCode() {
+        let username = document.getElementById("regUsername").value.trim();
+        let email = document.getElementById("regEmail").value.trim();
+        let pass = document.getElementById("regPassword").value.trim();
+        let accepted = document.getElementById("acceptTerms").checked;
+        let errorBox = document.getElementById("authError");
+        let successBox = document.getElementById("authSuccess");
+
+        errorBox.style.display = "none";
+        successBox.style.display = "none";
+
+        if (username === "" || email === "" || pass === "") {
+            errorBox.innerText = "Tafadhali jaza taarifa zote kwa usahihi!";
+            errorBox.style.display = "block";
+            return;
+        }
+
+        if (!accepted) {
+            errorBox.innerText = "Tafadhali weka tiki kukubali terms & user rights!";
+            errorBox.style.display = "block";
+            return;
+        }
+
+        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        pendingUserData = { username, email, pass };
+
+        document.getElementById("registrationInputs").style.display = "none";
+        document.getElementById("otpSection").style.display = "block";
+
+        successBox.innerText = "Code ya uthibitisho imetumwa kwenye " + email + " (Code ya Majaribio: " + generatedOTP + ")";
+        successBox.style.display = "block";
+    }
+
+    // Verify OTP Code and Register
+    function verifyOTPAndRegister() {
+        let enteredOTP = document.getElementById("otpInput").value.trim();
+        let errorBox = document.getElementById("authError");
+        let successBox = document.getElementById("authSuccess");
+
+        errorBox.style.display = "none";
+
+        if (enteredOTP !== generatedOTP) {
+            errorBox.innerText = "Verification code sio sahihi! Angalia tena.";
+            errorBox.style.display = "block";
+            return;
+        }
+
+        successBox.innerText = "Email imethibitishwa kikamilifu! Usajili umekamilika. Unaweza ku-Login sasa.";
+        successBox.style.display = "block";
+
+        document.getElementById("loginIdentifier").value = pendingUserData.username;
+        document.getElementById("loginPassword").value = pendingUserData.pass;
+
+        setTimeout(() => {
+            document.getElementById("registrationInputs").style.display = "block";
+            document.getElementById("otpSection").style.display = "none";
+            document.getElementById("otpInput").value
