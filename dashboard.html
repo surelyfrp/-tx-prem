@@ -1,0 +1,622 @@
+
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>TX-PREM | Reseller Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121b30;
+      --panel2: #17243b;
+      --border: #293958;
+      --text: #f4f7ff;
+      --muted: #9eacc8;
+      --cyan: #42e8d0;
+      --red: #ff8585;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at top, #172b46 0%, var(--bg) 58%);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    button { font: inherit; cursor: pointer; }
+
+    header {
+      background: rgba(12, 20, 38, .96);
+      border-bottom: 1px solid var(--border);
+      padding: 17px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .header-inner {
+      max-width: 1050px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: .5px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+      letter-spacing: 1.5px;
+    }
+
+    main {
+      width: min(1050px, 100%);
+      margin: auto;
+      padding: 24px 16px 40px;
+    }
+
+    .welcome {
+      background: linear-gradient(120deg, #172943, #121b30);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 23px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      font-size: clamp(22px, 5vw, 30px);
+      margin: 9px 0;
+      overflow-wrap: anywhere;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin: 0 0 15px;
+    }
+
+    p { line-height: 1.5; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-block;
+      color: var(--cyan);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: rgba(18, 27, 48, .96);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 19px;
+      min-width: 0;
+    }
+
+    .metric {
+      font-size: clamp(26px, 5vw, 34px);
+      color: var(--cyan);
+      font-weight: 800;
+      margin: 13px 0 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .section { margin-top: 18px; }
+
+    .tool-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .tool-row:first-of-type { border-top: 0; }
+
+    .tool-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: #20364c;
+      color: var(--cyan);
+      font-size: 20px;
+    }
+
+    .tool-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .tool-info strong { font-size: 14px; }
+
+    .pill {
+      border: 1px solid #2c625e;
+      color: var(--cyan);
+      background: #142e35;
+      border-radius: 30px;
+      padding: 6px 9px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .list-item {
+      border-top: 1px solid var(--border);
+      padding: 13px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .list-item:first-child { border-top: 0; }
+
+    .list-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .list-detail {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 12px 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      background: var(--cyan);
+      color: #07131c;
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 15px;
+      font-weight: bold;
+    }
+
+    .btn-secondary {
+      background: #24334e;
+      color: white;
+      border: 1px solid #354765;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    #notice {
+      display: none;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    #notice.error {
+      display: block;
+      color: #ffc0c0;
+      border-color: #774047;
+      background: #321c2a;
+    }
+
+    #notice.info {
+      display: block;
+      color: var(--cyan);
+      background: #142e35;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 24px 10px;
+    }
+
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: 1fr; gap: 10px; }
+      main { padding: 17px 12px 30px; }
+      .welcome, .card { padding: 16px; }
+      header { padding: 15px 12px; }
+      .brand { font-size: 20px; }
+      .header-inner { align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="brand">TX-PREM 🚀</div>
+        <div class="subtitle">RESELLER PORTAL</div>
+      </div>
+      <button class="btn btn-secondary" id="logout">
+        Toka
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div id="notice" role="status" aria-live="polite"></div>
+
+    <section class="welcome">
+      <div class="eyebrow">Reseller Dashboard</div>
+      <h1 id="username">Inapakia akaunti...</h1>
+      <div class="muted" id="email">Tafadhali subiri.</div>
+      <div class="status">● Mfumo wa akaunti</div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="muted">Credits Zangu</div>
+        <div class="metric" id="credits">--</div>
+        <div class="metric-label">Salio la credits</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Leseni Zangu</div>
+        <div class="metric" id="licenseCount">--</div>
+        <div class="metric-label">Jumla ya leseni</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Akaunti</div>
+        <div class="metric" style="font-size:23px">Reseller</div>
+        <div class="metric-label">TX-PREM Portal</div>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>🧰 FRP Tools</h2>
+
+      <div class="tool-row">
+        <div class="tool-info">
+          <div class="tool-icon">⚙️</div>
+          <div>
+            <strong>FRP Tools</strong>
+            <div class="muted">Tools zilizoidhinishwa</div>
+          </div>
+        </div>
+        <span class="pill">Maandalizi</span>
+      </div>
+
+      <div class="tool-row">
+        <div class="tool-info">
+          <div class="tool-icon">🔑</div>
+          <div>
+            <strong>Activation & Licenses</strong>
+            <div class="muted">Usimamizi wa leseni</div>
+          </div>
+        </div>
+        <span class="pill">Leseni</span>
+      </div>
+
+      <p class="muted">
+        Sehemu hii itaunganishwa na tools na huduma utakazoweka
+        kwenye mfumo wako.
+      </p>
+    </section>
+
+    <section class="card section">
+      <h2>📄 Leseni Zangu</h2>
+      <div id="licenses" class="empty">Inapakia leseni...</div>
+    </section>
+
+    <section class="card section">
+      <h2>💳 Historia ya Credits</h2>
+      <div id="transactions" class="empty">
+        Inapakia historia...
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>⚡ Akaunti Yangu</h2>
+      <div class="muted">
+        Taarifa za salio na leseni hupakiwa kutoka kwenye database.
+      </div>
+      <div class="actions">
+        <button class="btn" id="refresh">Onyesha upya</button>
+        <button class="btn btn-secondary" id="logout2">
+          Logout
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      TX-PREM 🚀 · Reseller Portal
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL =
+      "https://ybhgxtnvemvqrysknvmp.supabase.co";
+
+    const SUPABASE_KEY =
+      "WEKA_HAPA_PUBLISHABLE_KEY_YAKO";
+
+    const notice = document.getElementById("notice");
+    const refreshButton = document.getElementById("refresh");
+
+    let client = null;
+    let currentUser = null;
+
+    function message(text, type = "error") {
+      notice.textContent = text;
+      notice.className = type;
+    }
+
+    function clearMessage() {
+      notice.textContent = "";
+      notice.className = "";
+    }
+
+    function showText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function renderList(id, items, formatter, emptyText) {
+      const box = document.getElementById(id);
+      box.replaceChildren();
+
+      if (!items || items.length === 0) {
+        box.className = "empty";
+        box.textContent = emptyText;
+        return;
+      }
+
+      box.className = "";
+
+      items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "list-item";
+
+        const title = document.createElement("div");
+        title.className = "list-title";
+        title.textContent = formatter(item).title;
+
+        const detail = document.createElement("div");
+        detail.className = "list-detail";
+        detail.textContent = formatter(item).detail;
+
+        row.append(title, detail);
+        box.appendChild(row);
+      });
+    }
+
+    function formatDate(value) {
+      if (!value) return "Haijawekwa";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "Haijulikani";
+      return date.toLocaleDateString("sw-TZ");
+    }
+
+    async function logout() {
+      if (client) {
+        const { error } = await client.auth.signOut();
+        if (error) {
+          message("Imeshindwa kutoka: " + error.message);
+          return;
+        }
+      }
+      window.location.replace("index.html");
+    }
+
+    document.getElementById("logout").addEventListener("click", logout);
+    document.getElementById("logout2").addEventListener("click", logout);
+
+    async function loadDashboard() {
+      clearMessage();
+      refreshButton.disabled = true;
+
+      try {
+        if (!window.supabase) {
+          throw new Error(
+            "Supabase haijapakia. Angalia intaneti yako."
+          );
+        }
+
+        if (
+          !SUPABASE_URL.startsWith("https://") ||
+          SUPABASE_KEY.startsWith("https://ybhgxtnvemvqrysknvmp.supabase.co")
+        ) {
+          throw new Error(
+            "Weka Supabase Project URL na Publishable Key sahihi."
+          );
+        }
+
+        if (!client) {
+          client = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+          );
+        }
+
+        const { data: sessionData, error: sessionError } =
+          await client.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!sessionData.session) {
+          window.location.replace("index.html");
+          return;
+        }
+
+        currentUser = sessionData.session.user;
+
+        showText("email", currentUser.email || "");
+        showText("username", "Karibu tena!");
+
+        const { data: profile, error: profileError } = await client
+          .from("reseller_profiles")
+          .select("username, credits")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        if (profileError) {
+          throw new Error(
+            "Tatizo la kusoma profile: " + profileError.message
+          );
+        }
+
+        if (!profile) {
+          showText("username", currentUser.email || "Reseller");
+          showText("credits", "0");
+          showText("licenseCount", "0");
+
+          renderList(
+            "licenses", [],
+            () => ({}),
+            "Profile haipo bado. Hakikisha profile ya reseller inatengenezwa wakati wa usajili."
+          );
+
+          renderList(
+            "transactions", [],
+            () => ({}),
+            "Historia haipatikani mpaka akaunti iunganishwe na profile."
+          );
+
+          message(
+            "Akaunti imeingia, lakini profile ya reseller haijapatikana. Hakikisha jedwali reseller_profiles na sera zake za database zimewekwa.",
+            "info"
+          );
+          return;
+        }
+
+        showText(
+          "username",
+          profile.username || currentUser.email || "Reseller"
+        );
+
+        showText(
+          "credits",
+          Number(profile.credits || 0).toLocaleString("en-US")
+        );
+
+        const { data: licenses, error: licenseError } = await client
+          .from("tool_licenses")
+          .select("tool_name, status, expires_at, created_at")
+          .eq("reseller_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (licenseError) {
+          renderList(
+            "licenses", [],
+            () => ({}),
+            "Imeshindwa kupakia leseni: " + licenseError.message
+          );
+          showText("licenseCount", "--");
+        } else {
+          showText("licenseCount", String(licenses.length));
+
+          renderList(
+            "licenses",
+            licenses,
+            item => ({
+              title: item.tool_name || "Leseni",
+              detail:
+                "Hali: " + (item.status || "Haijulikani") +
+                " · Mwisho: " + formatDate(item.expires_at)
+            }),
+            "Bado huna leseni zilizosajiliwa."
+          );
+        }
+
+        const { data: history, error: historyError } = await client
+          .from("credit_transactions")
+          .select("amount, description, created_at")
+          .eq("reseller_id", currentUser.id)
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (historyError) {
+          renderList(
+            "transactions", [],
+            () => ({}),
+            "Imeshindwa kupakia historia: " + historyError.message
+          );
+        } else {
+          renderList(
+            "transactions",
+            history,
+            item => ({
+              title:
+                (Number(item.amount) > 0 ? "+" : "") +
+                Number(item.amount || 0) + " credits",
+              detail:
+                (item.description || "Miamala") +
+                " · " + formatDate(item.created_at)
+            }),
+            "Bado hakuna miamala ya credits."
+          );
+        }
+      } catch (error) {
+        message(error.message || "Hitilafu imetokea.");
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    refreshButton.addEventListener("click", loadDashboard);
+
+    loadDashboard();
+  </script>
+</body>
+</html>
