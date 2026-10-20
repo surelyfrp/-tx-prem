@@ -1180,6 +1180,48 @@
   }
 
   startApp();
+
+<!-- CURRENCY CONVERTER WIDGET -->
+<div id="converterSection" class="panel nav-section">
+  <h2>💱 Live Currency Converter (USD ⇄ East Africa Currencies)</h2>
+  <p class="small" style="margin-bottom: 15px;">Badilisha dola kwenda TSH, KSH, na UGX kwa kutumia kiwango rasmi cha mfumo.</p>
+
+  <div style="background: #07111f; padding: 18px; border-radius: 12px; border: 1px solid #233650;">
+    <label for="convertUsdAmount">Weka Kiasi cha Dola (USD $):</label>
+    <input id="convertUsdAmount" type="number" min="0" step="any" value="1" oninput="calculateCurrencies(this.value)" placeholder="Enter USD amount">
+
+    <div style="margin-top: 15px; display: grid; gap: 10px;">
+      <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <span>🇹🇿 Tanzania Shillings (TSH):</span>
+        <strong id="resTsh" style="color: #10b981; font-size: 15px;">TSh 2,765</strong>
+      </div>
+
+      <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <span>🇰🇪 Kenyan Shillings (KSH):</span>
+        <strong id="resKsh" style="color: #38bdf8; font-size: 15px;">KSh 130</strong>
+      </div>
+
+      <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <span>🇺🇬 Ugandan Shillings (UGX):</span>
+        <strong id="resUgx" style="color: #f59e0b; font-size: 15px;">USh 3,700</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Kazi ya kuhesabu fedha moja kwa moja mtumiaji anapoandika
+  function calculateCurrencies(usdVal) {
+    const usd = parseFloat(usdVal) || 0;
+    
+    const tsh = Math.round(usd * 2765);
+    const ksh = Math.round(usd * 130);
+    const ugx = Math.round(usd * 3700);
+
+    document.getElementById("resTsh").textContent = "TSh " + tsh.toLocaleString();
+    document.getElementById("resKsh").textContent = "KSh " + ksh.toLocaleString();
+    document.getElementById("resUgx").textContent = "USh " + ugx.toLocaleString();
+  }
 </script>
 </body>
 </html>
