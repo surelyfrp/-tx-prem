@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TX-PREM | Autonomous FRP Reseller Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #07111f; color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; }
+    .news-ticker { background: #0284c7; color: #ffffff; padding: 6px 15px; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; position: relative; }
+    .news-ticker span { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; }
+    @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+    header { padding: 15px 20px; background: #0d1b2e; border-bottom: 1px solid #233650; display: flex; justify-content: space-between; align-items: center; position: relative; }
+    .logo-container { text-align: left; }
+    .logo { color: #38bdf8; font-size: 24px; font-weight: 900; }
+    .logo span { color: #f8fafc; }
+    .tagline-badge { font-size: 11px; background: #172b40; color: #38bdf8; border: 1px solid #0284c7; padding: 3px 8px; border-radius: 12px; display: inline-block; margin-top: 3px; }
+    .menu-btn { background: transparent; border: none; color: #38bdf8; font-size: 28px; cursor: pointer; display: none; padding: 5px 10px; }
+    .nav-drawer { position: absolute; top: 100%; right: 0; width: 290px; background: #0d1b2e; border: 1px solid #233650; border-top: none; border-radius: 0 0 0 12px; display: none; flex-direction: column; z-index: 100; box-shadow: -5px 8px 15px rgba(0,0,0,0.5); }
+    .nav-drawer.active { display: flex; }
+    .nav-drawer button { background: transparent; color: #f1f5f9; text-align: left; padding: 13px 18px; border-bottom: 1px solid #1e2d42; border-radius: 0; font-size: 13px; font-weight: normal; }
+    .nav-drawer button:hover { background: #172b40; color: #38bdf8; }
+    main { width: 100%; max-width: 920px; margin: 0 auto; padding: 22px 15px 45px; flex: 1; }
+    .hero { text-align: center; padding: 15px 5px; }
+    .hero h1 { font-size: 26px; margin-bottom: 8px; }
+    .hero h1 span { color: #38bdf8; }
+    .hero p { color: #94a3b8; line-height: 1.5; font-size: 14px; }
+    .panel, .card { background: #0d1b2e; border: 1px solid #233650; border-radius: 15px; padding: 20px; margin-bottom: 18px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tabs button { flex: 1; }
+    button { border: 0; padding: 12px; border-radius: 9px; background: #0284c7; color: white; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #0369a1; }
+    button.secondary { background: #233650; }
+    button.secondary:hover { background: #334861; }
+    button.wallet-btn { background: #10b981; }
+    button.wallet-btn:hover { background: #059669; }
+    input, select, textarea { display: block; width: 100%; margin: 8px 0 15px; padding: 12px; border-radius: 9px; border: 1px solid #334861; background: #07111f; color: white; font-size: 14px; }
+    label { color: #cbd5e1; font-size: 13px; }
+    .password-row { display: flex; gap: 8px; align-items: stretch; margin: 8px 0 15px; }
+    .password-row input { flex: 1; margin: 0; }
+    .toggle-password { min-width: 70px; padding: 10px; background: #233650; font-size: 12px; }
+    h2 { margin-bottom: 15px; font-size: 20px; color: #f8fafc; }
+    h3 { margin-bottom: 10px; color: #38bdf8; }
+    .message { margin-top: 15px; padding: 12px; border-radius: 8px; background: #172b40; color: #bae6fd; line-height: 1.5; overflow-wrap: anywhere; font-size: 13px; }
+    .hidden { display: none !important; }
+    .balance-card { background: linear-gradient(135deg, #102b3f 0%, #07111f 100%); border: 1px solid #0284c7; border-radius: 12px; padding: 20px; margin: 18px 0; text-align: center; }
+    .credits { font-size: 36px; font-weight: bold; color: #38bdf8; margin: 10px 0; }
+    .tsh-value { color: #10b981; font-size: 14px; font-weight: bold; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+    .tool-card { display: flex; gap: 15px; align-items: flex-start; background: #0d1b2e; border: 1px solid #233650; border-radius: 12px; padding: 15px; }
+    .tool-logo { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #07111f; padding: 3px; border: 1px solid #233650; flex-shrink: 0; }
+    .tool-info { flex: 1; }
+    .tool-info h3 { font-size: 16px; margin-bottom: 4px; }
+    .tool-info p { color: #94a3b8; font-size: 12px; line-height: 1.4; margin-bottom: 8px; }
+    .price-tag { font-weight: bold; color: #38bdf8; font-size: 13px; margin-bottom: 8px; display: block; }
+    .small { color: #94a3b8; font-size: 12px; line-height: 1.5; margin-top: 10px; }
+    .full-width { width: 100%; }
+    .link-btn { background: none; border: none; color: #38bdf8; font-size: 13px; cursor: pointer; padding: 0; text-decoration: underline; margin-top: 5px; }
+    .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 12px 0 20px; }
+    .pay-card { background: #07111f; border: 2px solid #233650; border-radius: 10px; padding: 10px 5px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .pay-card:hover, .pay-card.selected { border-color: #38bdf8; background: #102b3f; }
+    .pay-card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; border-radius: 6px; }
+    .pay-card span { display: block; font-size: 11px; font-weight: bold; color: #cbd5e1; }
+    .tx-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    .tx-table th, .tx-table td { padding: 12px; text-align: left; border-bottom: 1px solid #1e2d42; }
+    .tx-table th { background: #102b3f; color: #38bdf8; }
+    .badge-pending { background: #854d0e; color: #fef08a; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
+    .badge-success { background: #166534; color: #bbf7d0; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
+    .badge-failed { background: #991b1b; color: #f87171; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 10, 20, 0.88); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
+    .modal-content { background: #0d1b2e; border: 1px solid #334861; border-radius: 16px; width: 100%; max-width: 520px; padding: 22px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+    .copy-btn { background: #233650; color: #38bdf8; border: 1px solid #38bdf8; padding: 4px 8px; font-size: 11px; border-radius: 5px; cursor: pointer; margin-left: 8px; }
+    .whatsapp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #000; font-weight: bold; padding: 10px 16px; border-radius: 8px; text-decoration: none; margin-top: 10px; font-size: 13px; }
+    .qr-container { background: white; padding: 15px; border-radius: 10px; display: inline-block; margin: 10px 0; text-align: center; }
+    .invoice-box { background: #ffffff; color: #0f172a; padding: 20px; border-radius: 12px; font-family: Arial, sans-serif; }
+    footer { text-align: center; padding: 20px; color: #64748b; border-top: 1px solid #233650; font-size: 12px; background: #0d1b2e; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+<div class="news-ticker">
+  <span>🔥 SPECIAL OFFER: Deposit $100+ USD and get +15% Bonus Credit Instantly! | ⚡ Universal QR Bank & Mobile Money Scan | Rate: 1 USD = <span id="tickerRate">2,765</span> TSH</span>
+</div>
+
+<header>
+  <div class="logo-container">
+    <div class="logo">TX-PREM <span>🚀</span></div>
+    <div class="tagline-badge">Autonomous FRP & Reseller Engine</div>
+  </div>
+
+  <button id="menuBtn" class="menu-btn" onclick="toggleMenu()" aria-label="Toggle Navigation">☰</button>
+
+  <nav id="navDrawer" class="nav-drawer">
+    <button onclick="navigateTo('license')">1. Tool Licenses & Activations</button>
+    <button onclick="navigateTo('rent')">2. Rent Tools (Daily & Weekly)</button>
+    <button onclick="navigateTo('icloud')">3. iCloud & Apple Bypass 🍎</button>
+    <button onclick="navigateTo('remote')">4. Remote USB Servicing 🖥️</button>
+    <button onclick="navigateTo('balance')">5. Deposit & Universal QR 💳</button>
+    <button onclick="navigateTo('converter')">6. Live Currency Converter 💱</button>
+    <button onclick="navigateTo('referral')">7. Invite & Earn QR Code 🤝</button>
+    <button onclick="navigateTo('account')">8. Account Settings</button>
+    <button onclick="navigateTo('tracker')">9. Live Orders & Status Tracker 🧾</button>
+    <button onclick="navigateTo('admin')" style="color: #38bdf8; font-weight: bold;">👑 Admin Panel Access</button>
+    <button onclick="navigateTo('feedback')">11. Reviews & Feedback 💬</button>
+    <button onclick="logout()" style="color: #f87171;">12. Log Out</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Welcome to <span>TX-PREM</span></h1>
+    <p>Autonomous portal for automated license activations, instant rental tools, and multi-network payments.</p>
+  </section>
+
+  <!-- AUTH SECTION -->
+  <section id="authSection" class="panel">
+    <div id="authTabs" class="tabs">
+      <button id="loginTab" type="button" onclick="showForm('login')">Login</button>
+      <button id="registerTab" type="button" class="secondary" onclick="showForm('register')">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <h2>Sign In Required</h2>
+      <p class="small" style="margin-bottom:15px; color:#38bdf8;"> Sign in to access autonomous activation & live wallet tracking.</p>
+
+      <label for="loginEmail">Email Address</label>
+      <input id="loginEmail" type="email" placeholder="Enter your email" required autocomplete="email">
+
+      <label for="loginPassword">Password</label>
+      <div class="password-row">
+        <input id="loginPassword" type="password" placeholder="Enter your password" required autocomplete="current-password">
+        <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">Show</button>
+      </div>
+
+      <button id="loginButton" type="submit" class="full-width">Login to Continue</button>
+
+      <div style="text-align: right; margin-top: 10px;">
+        <button type="button" class="link-btn" onclick="showForm('forgot')">Forgot Password?</button>
+      </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" class="hidden">
+      <h2>Create Reseller Account</h2>
+      <label for="regUsername">Username</label>
+      <input id="regUsername" type="text" placeholder="Example: user123" minlength="3" maxlength="30" required autocomplete="username">
+
+      <label for="regEmail">Email Address</label>
+      <input id="regEmail" type="email" placeholder="Enter your email" required autocomplete="email">
+
+      <label for="regPassword">Password (Min. 8 characters)</label>
+      <div class="password-row">
+        <input id="regPassword" type="password" placeholder="Create password" minlength="8" required autocomplete="new-password">
+        <button type="button" class="toggle-password" onclick="togglePassword('regPassword', this)">Show</button>
+      </div>
+
+      <label for="regConfirmPassword">Confirm Password</label>
+      <div class="password-row">
+        <input id="regConfirmPassword" type="password" placeholder="Repeat password" minlength="8" required autocomplete="new-password">
+        <button type="button" class="toggle-password" onclick="togglePassword('regConfirmPassword', this)">Show</button>
+      </div>
+
+      <button id="registerButton" type="submit" class="full-width">Create Reseller Account</button>
+    </form>
+
+    <!-- FORGOT FORM -->
+    <form id="forgotForm" class="hidden">
+      <h2>Reset Password Request</h2>
+      <label for="forgotEmail">Email Address</label>
+      <input id="forgotEmail" type="email" placeholder="Enter registered email" required autocomplete="email">
+      <button id="forgotButton" type="submit" class="full-width">Send Reset Link</button>
+      <div style="text-align: center; margin-top: 15px;">
+        <button type="button" class="link-btn" onclick="showForm('login')">Back to Login</button>
+      </div>
+    </form>
+
+    <div id="authMessage" class="message hidden"></div>
+  </section>
+
+  <!-- DASHBOARD SECTION -->
+  <section id="dashboardSection" class="hidden">
+
+    <!-- 1. TOOL LICENSES & ACTIVATIONS -->
+    <div id="licenseSection" class="panel nav-section">
+      <h2>1. Tool Licenses & Activations (A - Z)</h2>
+      <p class="small" style="margin-bottom: 20px;">Instant autonomous activation with live processing timer.</p>
+
+      <div class="grid">
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=100&auto=format&fit=crop" class="tool-logo" alt="AMT">
+          <div class="tool-info">
+            <h3>AMT Tool</h3>
+            <p>Android Multi Tool for Xiaomi, Vivo, Oppo & Samsung FRP.</p>
+            <span class="price-tag" id="price_amt">$25.00 / Year</span>
+            <button class="full-width" onclick="protectedAction('AMT Tool License', 25, false)">Buy / Activate</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=100&auto=format&fit=crop" class="tool-logo" alt="Cheetah">
+          <div class="tool-info">
+            <h3>Cheetah Tool (Free Edition)</h3>
+            <p>Qualcomm & MTK servicing tool. Instant download & guide.</p>
+            <span class="price-tag" id="price_cheetah">$3.00 Fee</span>
+            <button class="full-width" onclick="protectedAction('Cheetah Tool Free Edition', 3, true, 'https://cheetahtool.com/download', '1. Download official setup.\n2. Install USB drivers.\n3. Run Cheetah.exe as Admin.')">Get Tool & Guide</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1563770660941-20978e870e26?w=100&auto=format&fit=crop" class="tool-logo" alt="Chimera">
+          <div class="tool-info">
+            <h3>Chimera Tool</h3>
+            <p>Advanced multi-brand solution for Samsung, Huawei & MTK devices.</p>
+            <span class="price-tag" id="price_chimera">$65.00 / License</span>
+            <button class="full-width" onclick="protectedAction('Chimera Tool License', 65, false)">Buy / Activate</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=100&auto=format&fit=crop" class="tool-logo" alt="DFT">
+          <div class="tool-info">
+            <h3>DFT Pro Tool</h3>
+            <p>FRP, flashing, and bootloader unlocking for various CPU types.</p>
+            <span class="price-tag" id="price_dft">$35.00 / Year</span>
+            <button class="full-width" onclick="protectedAction('DFT Pro License', 35, false)">Buy / Activate</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=100&auto=format&fit=crop" class="tool-logo" alt="GSM">
+          <div class="tool-info">
+            <h3>GSM Flasher Tool</h3>
+            <p>Classic tool for bypass and flashing. Free utility support.</p>
+            <span class="price-tag" id="price_gsm">$2.00 Fee</span>
+            <button class="full-width" onclick="protectedAction('GSM Flasher Tool', 2, true, 'https://gsmflasher.com/download', '1. Extract archive.\n2. Disable AV temporarily.\n3. Run as Administrator.')">Get Tool & Guide</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=100&auto=format&fit=crop" class="tool-logo" alt="Miracle">
+          <div class="tool-info">
+            <h3>Miracle Thunder (Free)</h3>
+            <p>Legacy tool for MTK and SPD repairs. Free edition helper.</p>
+            <span class="price-tag" id="price_miracle">$2.50 Fee</span>
+            <button class="full-width" onclick="protectedAction('Miracle Thunder Free', 2.5, true, 'https://miraclebox.com/download', '1. Install MTK drivers.\n2. Connect phone holding boot keys.')">Get Tool & Guide</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. RENT TOOLS SECTION (INCLUDING FREE TOOLS NOW) -->
+    <div id="rentSection" class="panel nav-section hidden">
+      <h2>2. Tool Rental Services (All Tools Available)</h2>
+      <p class="small" style="margin-bottom: 20px;">Rent premium licenses or free-utility helper packages instantly with automated deployment.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Rent UnlockTool (1 Day)</h3>
+          <p>Full digital license access valid for 24 Hours.</p>
+          <span class="price-tag" id="price_rent1">$1.00 / 1 Day</span>
+          <button class="full-width" onclick="protectedAction('Rent UnlockTool (1 Day)', 1, false)">Rent Now</button>
+        </div>
+
+        <div class="card">
+          <h3>Rent UnlockTool (5 Days)</h3>
+          <p>Full digital license access valid for 5 full days.</p>
+          <span class="price-tag" id="price_rent5">$3.00 / 5 Days</span>
+          <button class="full-width" onclick="protectedAction('Rent UnlockTool (5 Days)', 3, false)">Rent Now</button>
+        </div>
+
+        <div class="card">
+          <h3>Rent Chimera Tool (1 Day)</h3>
+          <p>Full features & Samsung/MTK repair access for 1 day.</p>
+          <span class="price-tag" id="price_chimera1">$3.00 / 1 Day</span>
+          <button class="full-width" onclick="protectedAction('Rent Chimera Tool (1 Day)', 3, false)">Rent Now</button>
+        </div>
+
+        <div class="card">
+          <h3>Rent Chimera Tool (5 Days)</h3>
+          <p>Full features & Samsung/MTK repair access for 5 days.</p>
+          <span class="price-tag" id="price_chimera5">$8.00 / 5 Days</span>
+          <button class="full-width" onclick="protectedAction('Rent Chimera Tool (5 Days)', 8, false)">Rent Now</button>
+        </div>
+
+        <div class="card">
+          <h3>Rent Cheetah Tool Package</h3>
+          <p>Complete Cheetah helper kit for short-term projects.</p>
+          <span class="price-tag" id="price_rentCheetah">$2.00 / 3 Days</span>
+          <button class="full-width" onclick="protectedAction('Rent Cheetah Tool Package', 2, true, 'https://cheetahtool.com/download', '1. Use rental credentials sent to your Gmail.\n2. Log into Cheetah loader.')">Rent & Get Guide</button>
+        </div>
+
+        <div class="card">
+          <h3>Rent GSM Flasher Suite</h3>
+          <p>Unlimited multi-flashing helper suite for 3 days.</p>
+          <span class="price-tag" id="price_rentGsm">$1.50 / 3 Days</span>
+          <button class="full-width" onclick="protectedAction('Rent GSM Flasher Suite', 1.5, true, 'https://gsmflasher.com/download', '1. Access suite via portal token.\n2. Run flashing tasks.')">Rent & Get Guide</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ICLOUD & APPLE BYPASS PANEL -->
+    <div id="icloudSection" class="panel nav-section hidden">
+      <h2>3. iCloud & Apple Bypass Registration 🍎</h2>
+      <p class="small" style="margin-bottom: 15px;">Autonomous server registration for serial numbers and IMEI.</p>
+
+      <form id="icloudForm">
+        <label for="appleSn">Device Serial Number (SN) / IMEI:</label>
+        <input id="appleSn" type="text" placeholder="e.g. F2LXM0ABC123 or 352093..." required>
+
+        <label for="appleService">Select Bypass Tool / Service:</label>
+        <select id="appleService" required>
+          <option value="iKeyPrime Bypass (Signal) - $15.00">iKeyPrime Bypass (With Signal) - $15.00</option>
+          <option value="MinaRamdisk Bypass - $20.00">MinaRamdisk Pro Bypass - $20.00</option>
+          <option value="Checkm8 Bypass - $18.00">Checkm8 Tool Bypass - $18.00</option>
+        </select>
+
+        <button type="submit" class="full-width">Submit SN / IMEI for Autonomous Processing</button>
+      </form>
+    </div>
+
+    <!-- 4. REMOTE USB SERVICING -->
+    <div id="remoteSection" class="panel nav-section hidden">
+      <h2>4. Remote USB Servicing Booking 🖥️</h2>
+      <p class="small" style="margin-bottom: 15px;">Book a remote session with automated technician queueing.</p>
+
+      <form id="remoteForm">
+        <label for="remModel">Phone Model & Problem:</label>
+        <input id="remModel" type="text" placeholder="e.g. Samsung A12 FRP" required>
+
+        <label for="remAnydesk">USB Redirector IP / AnyDesk ID:</label>
+        <input id="remAnydesk" type="text" placeholder="e.g. 982 341 102" required>
+
+        <button type="submit" class="full-width">Book Remote Session ($3.00)</button>
+      </form>
+    </div>
+
+    <!-- 5. CREDIT BALANCE & DEPOSIT SECTION + UNIVERSAL QR -->
+    <div id="balanceSection" class="panel nav-section hidden">
+      <h2>5. Deposit, Wallet Balance & Universal Bank/Mobile QR 💳</h2>
+
+      <div class="balance-card">
+        <p style="color:#cbd5e1; font-size: 13px;">Your Available Credit Balance</p>
+        <div class="credits" id="userCredits">$0.00</div>
+        <p class="tsh-value">≈ <span id="userCreditsTsh">TSh 0</span> TSH (Rate: 1 USD = <span id="displayRate">2,765</span> TSH)</p>
+      </div>
+
+      <div style="background: #07111f; padding: 18px; border-radius: 12px; border: 1px solid #233650; margin-bottom: 20px; text-align: center;">
+        <h3 style="color:#38bdf8; font-size:16px;">Universal Bank & Mobile Money QR Scanner</h3>
+        <p class="small" style="margin-bottom: 10px;">Scan using any banking app (CRDB, NMB, NBC) or Mobile Money wallet (M-Pesa, TigoPesa, Airtel, HaloPesa).</p>
+        <div class="qr-container">
+          <canvas id="universalQrCanvas"></canvas>
+        </div>
+      </div>
+
+      <div style="background: #07111f; padding: 18px; border-radius: 12px; border: 1px solid #233650; margin-bottom: 20px;">
+        <h3 style="color:#38bdf8; font-size:16px;">➕ Self-Service Balance Deposit</h3>
+        <p class="small" style="margin-bottom: 12px;">Minimum Deposit: <strong>$1.00 USD</strong>. 🎁 <strong>Special Offer:</strong> Deposit $100+ USD and get +15% Bonus Credit!</p>
+
+        <form id="depositForm">
+          <label for="depAmountUsd">Amount in USD ($):</label>
+          <input id="depAmountUsd" type="number" min="1" step="any" value="1" oninput="updateDepositCalc(this.value)" required>
+
+          <p style="font-size: 12px; color: #10b981; margin-bottom: 12px;">
+            Total Payable in TSH: <strong id="depTshCalc">TSh 2,765</strong>
+          </p>
+
+          <label for="depRef">Transaction Ref ID / Bank Receipt No:</label>
+          <input id="depRef" type="text" placeholder="e.g. 3H829104829 or NMB-98213" required>
+
+          <p class="small" style="background:#102b3f; padding:10px; border-radius:6px; color:#38bdf8; margin-bottom:12px;">
+            📲 <strong>Payment Line / Bank Account:</strong> <strong id="depositPhoneNum">+255628354099</strong>
+            <button type="button" class="copy-btn" onclick="copyNumber('+255628354099')">📋 Copy</button>
+          </p>
+
+          <button type="submit" class="full-width wallet-btn">Autonomously Credit Wallet</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 6. LIVE CURRENCY CONVERTER -->
+    <div id="converterSection" class="panel nav-section hidden">
+      <h2>6. Live Currency Converter (USD ⇄ East Africa Currencies) 💱</h2>
+      <p class="small" style="margin-bottom: 15px;">Real-time conversion based on portal exchange rates.</p>
+
+      <div style="background: #07111f; padding: 18px; border-radius: 12px; border: 1px solid #233650;">
+        <label for="convertUsdAmount">Enter USD ($):</label>
+        <input id="convertUsdAmount" type="number" min="0" step="any" value="1" oninput="calculateCurrencies(this.value)">
+
+        <div style="margin-top: 15px; display: grid; gap: 10px;">
+          <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between;">
+            <span>🇹🇿 TSH:</span> <strong id="resTsh" style="color: #10b981;">TSh 2,765</strong>
+          </div>
+          <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between;">
+            <span>🇰🇪 KSH:</span> <strong id="resKsh" style="color: #38bdf8;">KSh 130</strong>
+          </div>
+          <div style="background: #102b3f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between;">
+            <span>🇺🇬 UGX:</span> <strong id="resUgx" style="color: #f59e0b;">USh 3,700</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. REFERRAL PROGRAM & QR CODE -->
+    <div id="referralSection" class="panel nav-section hidden">
+      <h2>7. Invite Friends & Earn $0.50 Bonus 🤝</h2>
+      <p class="small" style="margin-bottom: 15px;">Share your personal invite link or QR code.</p>
+      
+      <label>Your Referral Link:</label>
+      <input id="refLinkInput" type="text" value="" readonly>
+      <button type="button" class="full-width secondary" onclick="copyNumber(document.getElementById('refLinkInput').value)">📋 Copy Link</button>
+
+      <div style="margin-top: 20px; text-align: center; background: #07111f; padding: 15px; border-radius: 12px; border: 1px solid #233650;">
+        <h3 style="color:#38bdf8; font-size:15px; margin-bottom:8px;">Referral QR Code</h3>
+        <div class="qr-container">
+          <canvas id="referralQrCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. ACCOUNT SETTINGS -->
+    <div id="accountSection" class="panel nav-section hidden">
+      <h2>8. Account Settings</h2>
+      <p style="margin-bottom: 8px;"><strong>Current Email:</strong> <span id="dashAccountEmail">--</span></p>
+
+      <form id="updateProfileForm" style="margin-top: 15px;">
+        <h3>Change Username</h3>
+        <label for="updateUsername">Username</label>
+        <input id="updateUsername" type="text" placeholder="New username" required>
+        <button type="submit" class="secondary">Update Username</button>
+      </form>
+    </div>
+
+    <!-- 9. LIVE ORDERS & STATUS TRACKER (PENDING, COMPLETED, FAILED) -->
+    <div id="trackerSection" class="panel nav-section hidden">
+      <h2>9. Live Orders & Status Tracker 🧾</h2>
+      <p class="small" style="margin-bottom: 15px;">View live status badges (Pending, Completed, Failed) and execution timers.</p>
+      
+      <div style="overflow-x: auto; margin-bottom: 20px;">
+        <table class="tx-table">
+          <thead>
+            <tr>
+              <th>Ref ID</th>
+              <th>Service / Tool</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Action / Timer</th>
+            </tr>
+          </thead>
+          <tbody id="txTableBody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #94a3b8;">No recent transactions found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- INVOICE PREVIEW MODAL -->
+      <div id="invoicePreviewBox" class="invoice-box hidden">
+        <h2 style="color:#0284c7; margin-bottom:5px;">TX-PREM RESELLER PORTAL</h2>
+        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Autonomous Service & Payment Invoice</p>
+        <hr style="margin-bottom:15px;">
+        <p><strong>Invoice ID:</strong> <span id="invId">--</span></p>
+        <p><strong>Customer Email:</strong> <span id="invEmail">--</span></p>
+        <p><strong>Service Item:</strong> <span id="invItem">--</span></p>
+        <p><strong>Amount Paid:</strong> <span id="invAmount">--</span></p>
+        <p><strong>Date:</strong> <span id="invDate">--</span></p>
+        <hr style="margin:15px 0;">
+        <button onclick="window.print()" style="background:#0284c7; color:white; padding:8px 15px; border-radius:6px; cursor:pointer;">🖨️ Print / Save PDF Invoice</button>
+      </div>
+    </div>
+
+    <!-- 10. ADMIN CONTROL PANEL -->
+    <div id="adminSection" class="panel nav-section hidden">
+      <h2>👑 Admin Control Panel</h2>
+      <p class="small" style="margin-bottom: 15px;">Autonomous system parameters and tool price configurations.</p>
+
+      <div id="adminLoginBox">
+        <h3>Admin Sign In</h3>
+        <label for="adminPassInput">Admin Password:</label>
+        <input id="adminPassInput" type="password" placeholder="Enter password (Cleanboy1)" required>
+        <button type="button" class="full-width" onclick="verifyAdmin()">Login as Admin</button>
+      </div>
+
+      <div id="adminDashboardBox" class="hidden">
+        <div style="background: #102b3f; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+          <h3 style="color: #10b981;">✅ Admin Dashboard Active</h3>
+          <p class="small">Control real-time pricing, exchange rates, and bank QR receiver details.</p>
+        </div>
+        
+        <label>Exchange Rate (1 USD to TSH):</label>
+        <input type="number" id="adminRateInput" value="2765">
+
+        <label>Admin Mobile Money / Bank Line:</label>
+        <input type="text" id="adminPhoneInput" value="+255628354099">
+
+        <h3 style="margin-top:15px; color:#38bdf8;">Tool Prices (USD):</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label>AMT Tool ($)</label><input type="number" id="p_amt" value="25"></div>
+          <div><label>Cheetah Fee ($)</label><input type="number" id="p_cheetah" value="3"></div>
+          <div><label>Chimera ($)</label><input type="number" id="p_chimera" value="65"></div>
+          <div><label>DFT Pro ($)</label><input type="number" id="p_dft" value="35"></div>
+          <div><label>GSM Flasher ($)</label><input type="number" id="p_gsm" value="2"></div>
+          <div><label>Miracle Free ($)</label><input type="number" id="p_miracle" value="2.5"></div>
+          <div><label>UnlockTool ($)</label><input type="number" id="p_unlocktool" value="55"></div>
+          <div><label>Rent 1 Day ($)</label><input type="number" id="p_rent1" value="1"></div>
+        </div>
+
+        <button type="button" class="wallet-btn" style="margin-top:15px;" onclick="saveAdminSettings()">Save All Parameters</button>
+        <button type="button" class="secondary full-width" style="margin-top: 10px;" onclick="logoutAdmin()">Admin Logout</button>
+      </div>
+    </div>
+
+    <!-- 11. REVIEWS & FEEDBACK -->
+    <div id="feedbackSection" class="panel nav-section hidden">
+      <h2>11. Customer Feedback & Service Review 💬</h2>
+      <form id="feedbackForm">
+        <label for="reviewRating">Service Rating:</label>
+        <select id="reviewRating" required>
+          <option value="⭐⭐⭐⭐⭐ (5/5) - Excellent">⭐⭐⭐⭐⭐ (5/5) - Excellent Service</option>
+          <option value="⭐⭐⭐⭐ (4/5) - Very Good">⭐⭐⭐⭐ (4/5) - Very Good</option>
+        </select>
+        <label for="reviewComment">Feedback / Comment:</label>
+        <textarea id="reviewComment" rows="4" placeholder="Write feedback..." required></textarea>
+        <button type="submit" class="full-width">Submit Feedback</button>
+      </form>
+    </div>
+
+    <div id="dashboardMessage" class="message hidden"></div>
+  </section>
+</main>
+
+<!-- FREE TOOL DOWNLOAD & GUIDE MODAL -->
+<div id="freeToolModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3 id="freeModalTitle" style="margin: 0; font-size: 18px; color: #10b981;">Automated Tool Delivery</h3>
+      <button onclick="closeFreeModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">✕</button>
+    </div>
+
+    <p class="small" style="color: #cbd5e1; margin-bottom: 10px;">Autonomous delivery successful! Access your download package and instructions below:</p>
+    
+    <div style="background: #07111f; padding: 15px; border-radius: 8px; border: 1px solid #334861; margin-bottom: 15px;">
+      <h4 style="color: #38bdf8; margin-bottom: 5px;">📥 Secure Download Link:</h4>
+      <a id="freeModalLink" href="#" target="_blank" class="download-btn" style="margin-bottom: 15px;">🔗 Download Official Tool Package</a>
+
+      <h4 style="color: #38bdf8; margin-bottom: 5px;">📋 Step-by-Step Instructions:</h4>
+      <p id="freeModalInstructions" style="font-size: 13px; color: #f8fafc; white-space: pre-line; line-height: 1.6;"></p>
+    </div>
+
+    <button type="button" class="full-width" onclick="closeFreeModal()">Close Window</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL OVERLAY -->
+<div id="paymentModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3 id="paymentModalTitle" style="margin: 0; font-size: 18px; color: #38bdf8;">Autonomous Checkout</h3>
+      <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">✕</button>
+    </div>
+
+    <div id="walletOptionBox" style="background: #102b3f; border: 1px solid #10b981; border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center;">
+      <p style="font-size: 13px; color: #cbd5e1;">Available Wallet Balance: <strong id="modalWalletBal" style="color:#10b981;">$0.00</strong></p>
+      <button id="payWithWalletBtn" type="button" class="full-width wallet-btn" style="margin-top: 8px;" onclick="payUsingWalletBalance()">⚡ Pay Instantly with Wallet Balance</button>
+    </div>
+
+    <hr style="border-color:#233650; margin-bottom: 15px;">
+
+    <form id="paymentForm">
+      <label>Or Pay via Mobile Money / Bank Prompt:</label>
+      <div class="payment-grid">
+        <div class="pay-card selected" onclick="selectPaymentMethod(this, 'Tigo Pesa')"><span>Tigo Pesa</span></div>
+        <div class="pay-card" onclick="selectPaymentMethod(this, 'Vodacom M-Pesa')"><span>M-Pesa</span></div>
+        <div class="pay-card" onclick="selectPaymentMethod(this, 'CRDB / NMB Bank')"><span>Bank QR</span></div>
+        <div class="pay-card" onclick="selectPaymentMethod(this, 'Airtel Money')"><span>Airtel</span></div>
+      </div>
+
+      <label for="payPhone">Phone / Account Number:</label>
+      <input id="payPhone" type="text" placeholder="e.g. 0628354099" required>
+
+      <label for="payAmount">Amount Payable:</label>
+      <input id="payAmount" type="text" required readonly style="color:#10b981; font-weight:bold;">
+
+      <button type="submit" class="full-width">Initiate Autonomous Payment</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p>TX-PREM 🚀 | Autonomous Reseller Portal</p>
+  <p style="margin-top: 4px; color:#38bdf8; font-weight:bold;">Uaminifu ni Mtaji | Honesty is Capital</p>
+  <p style="margin-top: 6px;">Support Line: <strong id="footerPhone">+255628354099</strong> | Email: <strong>surelyfrp@gmail.com</strong></p>
+  <a href="https://wa.me/255628354099" target="_blank" class="whatsapp-btn" id="whatsappLink">💬 Chat on WhatsApp Support</a>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://ybhgxtnvemvqrysknvmp.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_5SrVUvBqMzzXHuKE8ph6cA_uZB_W2yj";
+  const ADMIN_GMAIL = "surelyfrp@gmail.com";
+  
+  let TSH_RATE = 2765;
+  let ADMIN_PHONE = "+255628354099";
+
+  let toolPrices = {
+    amt: 25, cheetah: 3, chimera: 65, dft: 35, gsm: 2, miracle: 2.5, unlocktool: 55, rent1: 1, rent5: 3
+  };
+
+  let supabaseClient = null;
+  let currentUser = null;
+  let walletBalance = 0.00;
+  let selectedMethod = "Tigo Pesa";
+  let baseUsdAmount = 0;
+  let currentServiceTitle = "";
+  let transactions = [];
+
+  const authSection = document.getElementById("authSection");
+  const dashboardSection = document.getElementById("dashboardSection");
+  const authMessage = document.getElementById("authMessage");
+  const menuBtn = document.getElementById("menuBtn");
+  const navDrawer = document.getElementById("navDrawer");
+  const paymentModal = document.getElementById("paymentModal");
+
+  function verifyAdmin() {
+    const pass = document.getElementById("adminPassInput").value.trim();
+    if (pass === "Cleanboy1") {
+      document.getElementById("adminLoginBox").classList.add("hidden");
+      document.getElementById("adminDashboardBox").classList.remove("hidden");
+      alert("Admin login successful!");
+    } else {
+      alert("Nenosiri si sahihi! Tumia Cleanboy1.");
+    }
+  }
+
+  function saveAdminSettings() {
+    const newRate = parseFloat(document.getElementById("adminRateInput").value);
+    const newPhone = document.getElementById("adminPhoneInput").value.trim();
+
+    toolPrices.amt = parseFloat(document.getElementById("p_amt").value) || toolPrices.amt;
+    toolPrices.cheetah = parseFloat(document.getElementById("p_cheetah").value) || toolPrices.cheetah;
+    toolPrices.chimera = parseFloat(document.getElementById("p_chimera").value) || toolPrices.chimera;
+    toolPrices.dft = parseFloat(document.getElementById("p_dft").value) || toolPrices.dft;
+    toolPrices.gsm = parseFloat(document.getElementById("p_gsm").value) || toolPrices.gsm;
+    toolPrices.miracle = parseFloat(document.getElementById("p_miracle").value) || toolPrices.miracle;
+    toolPrices.unlocktool = parseFloat(document.getElementById("p_unlocktool").value) || toolPrices.unlocktool;
+    toolPrices.rent1 = parseFloat(document.getElementById("p_rent1").value) || toolPrices.rent1;
+
+    if(newRate && newRate > 0) {
+      TSH_RATE = newRate;
+      document.getElementById("tickerRate").textContent = TSH_RATE.toLocaleString();
+      document.getElementById("displayRate").textContent = TSH_RATE.toLocaleString();
+    }
+
+    if(newPhone) {
+      ADMIN_PHONE = newPhone;
+      document.getElementById("footerPhone").textContent = ADMIN_PHONE;
+      document.getElementById("depositPhoneNum").textContent = ADMIN_PHONE;
+      document.getElementById("whatsappLink").href = "https://wa.me/" + ADMIN_PHONE.replace("+","");
+      generateUniversalQR();
+    }
+
+    updateUIPrices();
+    alert("✅ Admin parameters updated successfully!");
+  }
+
+  function updateUIPrices() {
+    document.getElementById("price_amt").textContent = `$${toolPrices.amt.toFixed(2)} / Year`;
+    document.getElementById("price_cheetah").textContent = `$${toolPrices.cheetah.toFixed(2)} Fee`;
+    document.getElementById("price_chimera").textContent = `$${toolPrices.chimera.toFixed(2)} / License`;
+    document.getElementById("price_dft").textContent = `$${toolPrices.dft.toFixed(2)} / Year`;
+    document.getElementById("price_gsm").textContent = `$${toolPrices.gsm.toFixed(2)} Fee`;
+    document.getElementById("price_miracle").textContent = `$${toolPrices.miracle.toFixed(2)} Fee`;
+    document.getElementById("price_rent1").textContent = `$${toolPrices.rent1.toFixed(2)} / 1 Day`;
+    document.getElementById("price_rent5").textContent = `$${toolPrices.rent5.toFixed(2)} / 5 Days`;
+  }
+
+  function logoutAdmin() {
+    document.getElementById("adminPassInput").value = "";
+    document.getElementById("adminDashboardBox").classList.add("hidden");
+    document.getElementById("adminLoginBox").classList.remove("hidden");
+    navigateTo('license');
+  }
+
+  function showMessage(element, msg) {
+    element.textContent = msg;
+    element.classList.remove("hidden");
+  }
+
+  function hideMessage(element) {
+    element.textContent = "";
+    element.classList.add("hidden");
+  }
+
+  function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "Hide" : "Show";
+  }
+
+  function toggleMenu() { navDrawer.classList.toggle("active"); }
+
+  function copyNumber(num) {
+    navigator.clipboard.writeText(num);
+    alert("Copied: " + num);
+  }
+
+  function updateDepositCalc(usd) {
+    let parsedUsd = parseFloat(usd) || 0;
+    // Special offer: Deposit $100+ gets +15% bonus credit
+    if (parsedUsd >= 100) {
+      parsedUsd *= 1.15; // 15% bonus added to wallet value representation
+    }
+    const tsh = Math.round(parsedUsd * TSH_RATE);
+    document.getElementById("depTshCalc").textContent = "TSh " + tsh.toLocaleString() + (parsedUsd >= 100 ? " (Includes +15% Offer Bonus!)" : "");
+  }
+
+  function calculateCurrencies(usdVal) {
+    const usd = parseFloat(usdVal) || 0;
+    document.getElementById("resTsh").textContent = "TSh " + Math.round(usd * TSH_RATE).toLocaleString();
+    document.getElementById("resKsh").textContent = "KSh " + Math.round(usd * 130).toLocaleString();
+    document.getElementById("resUgx").textContent = "USh " + Math.round(usd * 3700).toLocaleString();
+  }
+
+  function protectedAction(serviceTitle, usdPrice, isFreeTool, downloadUrl, instructions) {
+    if (!currentUser) {
+      alert("🔒 LOGIN REQUIRED!\n\nPlease sign in to your TX-PREM account.");
+      showLogin();
+      return;
+    }
+    window.pendingFreeTool = isFreeTool ? { title: serviceTitle, url: downloadUrl, guide: instructions } : null;
+    openPaymentModal(serviceTitle, usdPrice);
+  }
+
+  function openFreeModal(title, url, guide) {
+    document.getElementById("freeModalTitle").textContent = "Autonomous Delivery: " + title;
+    document.getElementById("freeModalLink").href = url;
+    document.getElementById("freeModalInstructions").textContent = guide;
+    document.getElementById("freeToolModal").classList.remove("hidden");
+  }
+
+  function closeFreeModal() {
+    document.getElementById("freeToolModal").classList.add("hidden");
+    window.pendingFreeTool = null;
+  }
+
+  function sendGmailNotification(subject, body) {
+    fetch("https://formsubmit.co/ajax/" + ADMIN_GMAIL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ _subject: subject, message: body })
+    }).catch(err => console.log("Gmail Notification Error:", err));
+  }
+
+  function showForm(formName) {
+    hideMessage(authMessage);
+    document.getElementById("loginForm").classList.toggle("hidden", formName !== "login");
+    document.getElementById("registerForm").classList.toggle("hidden", formName !== "register");
+    document.getElementById("forgotForm").classList.toggle("hidden", formName !== "forgot");
+  }
+
+  function navigateTo(sectionName) {
+    navDrawer.classList.remove("active");
+    document.querySelectorAll(".nav-section").forEach(s => s.classList.add("hidden"));
+    const target = document.getElementById(sectionName + "Section");
+    if (target) target.classList.remove("hidden");
+
+    if (sectionName === 'referral' && currentUser) generateReferralQR();
+    if (sectionName === 'balance') generateUniversalQR();
+  }
+
+  function openPaymentModal(serviceTitle, usdPrice) {
+    currentServiceTitle = serviceTitle;
+    baseUsdAmount = usdPrice;
+    document.getElementById("paymentModalTitle").textContent = "Checkout: " + serviceTitle;
+    document.getElementById("modalWalletBal").textContent = "$" + walletBalance.toFixed(2);
+    
+    const walletBtn = document.getElementById("payWithWalletBtn");
+    if (walletBalance >= baseUsdAmount) {
+      walletBtn.disabled = false;
+      walletBtn.textContent = `⚡ Pay Instantly with Wallet ($${baseUsdAmount.toFixed(2)})`;
+    } else {
+      walletBtn.disabled = true;
+      walletBtn.textContent = `Insufficient Wallet Balance ($${walletBalance.toFixed(2)})`;
+    }
+
+    document.getElementById("payAmount").value = `$${baseUsdAmount.toFixed(2)} USD (TSh ${Math.round(baseUsdAmount * TSH_RATE).toLocaleString()})`;
+    paymentModal.classList.remove("hidden");
+  }
+
+  function closePaymentModal() { paymentModal.classList.add("hidden"); }
+
+  function selectPaymentMethod(element, methodName) {
+    document.querySelectorAll(".pay-card").forEach(card => card.classList.remove("selected"));
+    element.classList.add("selected");
+    selectedMethod = methodName;
+  }
+
+  function renderTransactions() {
+    const tbody = document.getElementById("txTableBody");
+    if (transactions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8;">No recent transactions found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = transactions.map(tx => {
+      let badgeHtml = '';
+      if (tx.status === 'PENDING') badgeHtml = '<span class="badge-pending">⏳ PENDING</span>';
+      else if (tx.status === 'COMPLETED') badgeHtml = '<span class="badge-success">✅ COMPLETED</span>';
+      else if (tx.status === 'FAILED') badgeHtml = '<span class="badge-failed">❌ FAILED / OUT OF STOCK</span>';
+
+      return `
+        <tr>
+          <td><strong>${tx.id}</strong></td>
+          <td>${tx.item}</td>
+          <td>$${tx.amount} USD</td>
+          <td>${badgeHtml}</td>
+          <td>
+            ${tx.status === 'COMPLETED' ? `<button style="padding:4px 8px; font-size:11px;" onclick="viewInvoice('${tx.id}', '${tx.item}', '${tx.amount}')">🧾 Invoice</button>` : 'Processing...'}
+            <span style="font-size:11px; color:#38bdf8; display:block; margin-top:3px;">⏱️ ${tx.timer}</span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function viewInvoice(id, item, amount) {
+    document.getElementById("invId").textContent = id;
+    document.getElementById("invEmail").textContent = currentUser ? currentUser.email : "--";
+    document.getElementById("invItem").textContent = item;
+    document.getElementById("invAmount").textContent = "$" + amount + " USD (TSh " + Math.round(amount * TSH_RATE).toLocaleString() + ")";
+    document.getElementById("invDate").textContent = new Date().toLocaleDateString();
+    document.getElementById("invoicePreviewBox").classList.remove("hidden");
+    navigateTo("tracker");
+  }
+
+  function payUsingWalletBalance() {
+    if (walletBalance < baseUsdAmount) {
+      alert("Insufficient wallet balance!");
+      return;
+    }
+
+    walletBalance -= baseUsdAmount;
+    updateUserWalletUI();
+
+    const refId = "AUT-" + Math.floor(100000 + Math.random() * 900000);
+    
+    // Create autonomous transaction entry starting with PENDING
+    const newTx = { id: refId, item: currentServiceTitle, amount: baseUsdAmount, status: 'PENDING', timer: '00:03 Secs remaining' };
+    transactions.unshift(newTx);
+    renderTransactions();
+    closePaymentModal();
+    navigateTo("tracker");
+
+    sendGmailNotification(`⏳ PENDING ORDER: ${currentServiceTitle}`, `User ${currentUser.email} initiated order. Ref: ${refId}. Status: Pending autonomous verification.`);
+
+    // Autonomous processing simulation (Success within 3 seconds)
+    setTimeout(() => {
+      newTx.status = 'COMPLETED';
+      newTx.timer = 'Executed successfully in 2.4s';
+      renderTransactions();
+      sendGmailNotification(`✅ COMPLETED ORDER: ${currentServiceTitle}`, `User ${currentUser.email} order ${refId} has been autonomously executed and delivered!`);
+      alert(`🎉 AUTONOMOUS DELIVERY SUCCESSFUL!\n\nService '${currentServiceTitle}' is now active. Check your Gmail inbox for details.`);
+
+      if (window.pendingFreeTool) {
+        const toolData = window.pendingFreeTool;
+        openFreeModal(toolData.title, toolData.url, toolData.guide);
+      }
+    }, 3000);
+  }
+
+  document.getElementById("depositForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    let usd = parseFloat(document.getElementById("depAmountUsd").value) || 0;
+    const ref = document.getElementById("depRef").value.trim();
+
+    if (usd >= 100) {
+      usd *= 1.15; // Apply +15% bonus offer
+    }
+
+    walletBalance += usd;
+    updateUserWalletUI();
+
+    sendGmailNotification(`💰 AUTONOMOUS DEPOSIT: $${usd.toFixed(2)} USD (Ref: ${ref})`, `User ${currentUser.email} deposited funds autonomously.`);
+    alert(`✅ DEPOSIT VERIFIED!\n\n$${usd.toFixed(2)} USD added to your wallet successfully.`);
+    document.getElementById("depositForm").reset();
+  });
+
+  document.getElementById("icloudForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const sn = document.getElementById("appleSn").value.trim();
+    const service = document.getElementById("appleService").value;
+    sendGmailNotification(`🍎 ICLOUD REQUEST: ${sn}`, `User ${currentUser.email}\nSN: ${sn}\nService: ${service}`);
+    alert("✅ iCloud SN Submitted for Autonomous Server Processing!");
+    document.getElementById("icloudForm").reset();
+  });
+
+  document.getElementById("remoteForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const model = document.getElementById("remModel").value.trim();
+    const id = document.getElementById("remAnydesk").value.trim();
+    sendGmailNotification(`🖥️ REMOTE BOOKED: ${model}`, `User ${currentUser.email}\nAnyDesk: ${id}`);
+    alert("✅ Remote USB Session Queued!");
+    document.getElementById("remoteForm").reset();
+  });
+
+  function updateUserWalletUI() {
+    document.getElementById("userCredits").textContent = "$" + walletBalance.toFixed(2);
+    document.getElementById("userCreditsTsh").textContent = "TSh " + Math.round(walletBalance * TSH_RATE).toLocaleString();
+  }
+
+  function generateUniversalQR() {
+    const canvas = document.getElementById("universalQrCanvas");
+    const payload = `UNIVERSAL_QR_PAY:TO=${ADMIN_PHONE}:BANKS=CRDB,NMB,NBC,EXIM:WALLETS=MPESA,TIGOPESA,AIRTEL,HALOPESA`;
+    QRCode.toCanvas(canvas, payload, { width: 160, margin: 1 }, function (error) {
+      if (error) console.error(error);
+    });
+  }
+
+  function generateReferralQR() {
+    const canvas = document.getElementById("referralQrCanvas");
+    const refUrl = document.getElementById("refLinkInput").value;
+    QRCode.toCanvas(canvas, refUrl, { width: 150, margin: 1 }, function (error) {
+      if (error) console.error(error);
+    });
+  }
+
+  async function startApp() {
+    try {
+      if (!window.supabase) return;
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+          showDashboard(session.user);
+        } else {
+          currentUser = null;
+          showLogin();
+        }
+      });
+    } catch (err) { console.log("Supabase Error:", err); }
+  }
+
+  function showDashboard(user) {
+    authSection.classList.add("hidden");
+    dashboardSection.classList.remove("hidden");
+    menuBtn.style.display = "block";
+    document.getElementById("dashAccountEmail").textContent = user.email || "";
+    const userSlug = user.email ? user.email.split('@')[0] : "user123";
+    document.getElementById("refLinkInput").value = window.location.origin + window.location.pathname + "?ref=" + userSlug;
+    updateUserWalletUI();
+    updateUIPrices();
+    generateUniversalQR();
+  }
+
+  function showLogin() {
+    dashboardSection.classList.add("hidden");
+    authSection.classList.remove("hidden");
+    menuBtn.style.display = "none";
+    showForm("login");
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      currentUser = data.user;
+      showDashboard(data.user);
+    } catch (err) { showMessage(authMessage, "Login failed: " + err.message); }
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("regUsername").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    try {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { username } } });
+      if (error) throw error;
+      sendGmailNotification(`👤 NEW RESELLER`, `Username: ${username}\nEmail: ${email}`);
+      if(data.session) showDashboard(data.user);
+    } catch (err) { showMessage(authMessage, "Registration failed: " + err.message); }
+  });
+
+  async function logout() {
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    currentUser = null;
+    showLogin();
+  }
+
+  startApp();
+</script>
+</body>
+</html>
